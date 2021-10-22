@@ -18,19 +18,24 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
-#include "i2c.h"
-#include "spi.h"
+//#include "i2c.h"
+//#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
-
+#include "delay.h"
+#include "AD9854.h"
+#include "ad5142.h"
+//#include "delay.h"
 #include "arm_math.h"
 #include "arm_const_structs.h"
 #include "arm_common_tables.h"
+#include "fft.h"
+#include "AD7606.h"
 /******************************************************************
 *@brief  Retargets the C library printf  function to the USART.
 *@param  None
@@ -42,7 +47,7 @@
 #else
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__*/
-
+int16_t AD7606_ADCValue[8];
 PUTCHAR_PROTOTYPE
 {
     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
@@ -78,7 +83,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-  arm_cfft_radix4_instance_f32 hfft;
+ // arm_cfft_radix4_instance_f32 hfft;
 /* USER CODE END 0 */
 
 /**
@@ -109,16 +114,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-//  MX_I2C1_Init();
- // MX_SPI1_Init();
+  //  MX_I2C1_Init();
+  // MX_SPI1_Init();
+
+  delay_init(168);
   MX_USART2_UART_Init();
- float Date[10];
+  //AD9854_Init();
+ // AD9854_SetSine_double(1000,4095);
+    AD7606_Init();
+    //FFTx4_Init(FFT_LENTH,0,1);// 初始化FFT
+
   /* USER CODE BEGIN 2 */
-    arm_cfft_radix4_init_f32(&hfft,1024,0,1);
-    arm_cfft_radix4_f32(&hfft,Date);
-
-
-
 
   /* USER CODE END 2 */
 
@@ -127,11 +133,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
-
-      printf("10\r\n");
-
-
+      printf("开始采集数据发送............\r\n");
+   AD7606_StartConv();
+  AD7606_ReadConvData();
+   printf("%d  %d  %d \r\n",AD7606_ADCValue[0],AD7606_ADCValue[1],AD7606_ADCValue[2]);
+      printf("数据发送测试中\r\n");
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
